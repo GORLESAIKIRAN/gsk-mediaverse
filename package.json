@@ -1,0 +1,25 @@
+{
+  "name": "gsk-mediaverse",
+  "version": "1.0.0",
+  "description": "GSK MEDIAVERSE - All-in-One Video & Audio Downloader and Media Utility Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "mediaverse",
+    "gsk",
+    "video-downloader",
+    "audio-converter",
+    "youtube-downloader",
+    "instagram-downloader",
+    "media-editor",
+    "audio-studio"
+  ],
+  "author": "GSK Studio",
+  "license": "MIT"
+}
