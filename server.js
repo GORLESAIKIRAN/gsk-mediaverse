@@ -59,15 +59,34 @@ setInterval(() => {
   }
 }, 10 * 60 * 1000);
 
+// Ensure media assets are synced between assets/ and public/media/
+try {
+  if (!fs.existsSync(ASSETS_DIR)) fs.mkdirSync(ASSETS_DIR, { recursive: true });
+  if (!fs.existsSync(PUBLIC_MEDIA_DIR)) fs.mkdirSync(PUBLIC_MEDIA_DIR, { recursive: true });
+  
+  const mediaFiles = ['sample_video.mp4', 'sample_audio.mp3', 'sample_audio.wav'];
+  for (const f of mediaFiles) {
+    const a = path.join(ASSETS_DIR, f);
+    const p = path.join(PUBLIC_MEDIA_DIR, f);
+    if (fs.existsSync(a) && !fs.existsSync(p)) {
+      fs.copyFileSync(a, p);
+    } else if (fs.existsSync(p) && !fs.existsSync(a)) {
+      fs.copyFileSync(p, a);
+    }
+  }
+} catch (e) {
+  // ignore
+}
+
 // Helper to parse JSON body
 function parseJsonBody(req) {
   return new Promise((resolve, reject) => {
     let body = '';
     req.on('data', chunk => {
       body += chunk.toString();
-      if (body.length > 50 * 1024 * 1024) { // 50MB safety
+      if (body.length > 200 * 1024 * 1024) { // 200MB safety
         req.destroy();
-        reject(new Error('Payload Too Large'));
+        reject(new Error('Payload Too Large (Max 200MB)'));
       }
     });
     req.on('end', () => {
@@ -81,11 +100,22 @@ function parseJsonBody(req) {
   });
 }
 
-// Helper to parse Multipart or Raw Binary
+// Helper to parse Multipart or Raw Binary (up to 200MB)
 function parseRawBody(req) {
   return new Promise((resolve, reject) => {
     const chunks = [];
-    req.on('data', chunk => chunks.push(chunk));
+    let totalBytes = 0;
+    const MAX_200MB = 200 * 1024 * 1024;
+
+    req.on('data', chunk => {
+      totalBytes += chunk.length;
+      if (totalBytes > MAX_200MB) {
+        req.destroy();
+        reject(new Error('Payload exceeds maximum studio limit of 200 MB.'));
+        return;
+      }
+      chunks.push(chunk);
+    });
     req.on('end', () => resolve(Buffer.concat(chunks)));
     req.on('error', reject);
   });
@@ -272,6 +302,7 @@ const server = http.createServer(async (req, res) => {
         version: '1.0.0',
         platform: process.platform,
         node: process.version,
+        max_upload_size_mb: 200,
         features: {
           youtube_video_downloader: true,
           youtube_audio_converter: true,

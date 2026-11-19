@@ -32,6 +32,10 @@ async def trim_media(
         with open(temp_input, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
+        file_size = os.path.getsize(temp_input)
+        if file_size > settings.MAX_UPLOAD_SIZE_MB * 1024 * 1024:
+            raise HTTPException(status_code=413, detail=f"File exceeds maximum limit of {settings.MAX_UPLOAD_SIZE_MB}MB.")
+
         output_path = await ffmpeg_service.trim_video(
             temp_input,
             start_time=start_time,

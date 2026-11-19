@@ -15,7 +15,7 @@ services:
       - key: ALLOWED_ORIGINS
         value: "*"
       - key: MAX_UPLOAD_SIZE_MB
-        value: "100"
+        value: "200"
       - key: RATE_LIMIT_PER_MINUTE
         value: "60"
 
@@ -32,3 +32,5 @@ services:
         value: 10000
       - key: HOST
         value: 0.0.0.0
+      - key: MAX_UPLOAD_SIZE_MB
+        value: "200"

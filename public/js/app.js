@@ -745,6 +745,13 @@ function handleYtAudioVolume(val) {
 // =========================================================================
 function handleConverterFileSelected(file) {
   if (!file) return;
+
+  const MAX_SIZE_MB = 200;
+  if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+    showToast(`File size exceeds the maximum studio limit of ${MAX_SIZE_MB}MB.`, 'error');
+    return;
+  }
+
   state.converterFile = file;
 
   const info = document.getElementById('converterSelectedFileInfo');

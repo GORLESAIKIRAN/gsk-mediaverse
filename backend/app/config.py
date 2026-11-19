@@ -32,7 +32,7 @@ class Settings(BaseSettings):
     
     # Storage
     TEMP_DIR: str = os.getenv("STORAGE_TEMP_DIR", os.path.join(os.path.dirname(__file__), "..", "temp_storage"))
-    MAX_UPLOAD_SIZE_MB: int = int(os.getenv("MAX_UPLOAD_SIZE_MB", 100))
+    MAX_UPLOAD_SIZE_MB: int = int(os.getenv("MAX_UPLOAD_SIZE_MB", 200))
     CLEANUP_INTERVAL_MINUTES: int = int(os.getenv("CLEANUP_INTERVAL_MINUTES", 15))
     FILE_TTL_SECONDS: int = 1800  # 30 minutes
     
