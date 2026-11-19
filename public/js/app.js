@@ -615,6 +615,26 @@ function openSuccessModal(fileName, format, size, url) {
   document.getElementById('successFormat').textContent = `${format.toUpperCase()} Stream`;
   document.getElementById('successFileSize').textContent = formatFileSize(size);
 
+  const previewBox = document.getElementById('successMediaPreviewContainer');
+  const videoEl = document.getElementById('successVideoPreview');
+  const audioEl = document.getElementById('successAudioPreview');
+
+  if (previewBox && videoEl && audioEl) {
+    previewBox.classList.remove('hidden');
+    const isVid = format.toLowerCase().includes('mp4') || format.toLowerCase().includes('video');
+    if (isVid) {
+      videoEl.src = url;
+      videoEl.classList.remove('hidden');
+      audioEl.classList.add('hidden');
+      videoEl.load();
+    } else {
+      audioEl.src = url;
+      audioEl.classList.remove('hidden');
+      videoEl.classList.add('hidden');
+      audioEl.load();
+    }
+  }
+
   const directBtn = document.getElementById('successDirectDownloadBtn');
   directBtn.onclick = () => {
     const a = document.createElement('a');
@@ -623,13 +643,19 @@ function openSuccessModal(fileName, format, size, url) {
     document.body.appendChild(a);
     a.click();
     a.remove();
+    showToast('Download started! Saved to your device.', 'success');
   };
 
   modal.classList.remove('hidden');
 }
 
 function closeSuccessModal() {
-  document.getElementById('successModal').classList.add('hidden');
+  const modal = document.getElementById('successModal');
+  modal.classList.add('hidden');
+  const videoEl = document.getElementById('successVideoPreview');
+  const audioEl = document.getElementById('successAudioPreview');
+  if (videoEl) { videoEl.pause(); videoEl.src = ''; }
+  if (audioEl) { audioEl.pause(); audioEl.src = ''; }
 }
 
 // =========================================================================
@@ -902,7 +928,7 @@ async function exportTrimmedVideo(audioOnly = false) {
 function loadSampleVideoToEditor() {
   const video = document.getElementById('editorVideoPlayer');
   if (video) {
-    video.src = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4';
+    video.src = '/media/sample_video.mp4';
     video.load();
     showToast('Loaded sample video into editor', 'info');
   }

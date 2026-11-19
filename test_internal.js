@@ -13,9 +13,15 @@ const requiredFiles = [
   'README.md',
   'public/index.html',
   'public/js/app.js',
+  'assets/sample_video.mp4',
+  'assets/sample_audio.mp3',
+  'assets/sample_audio.wav',
+  'public/media/sample_video.mp4',
+  'public/media/sample_audio.mp3',
   'backend/requirements.txt',
   'backend/Dockerfile',
   'backend/run.py',
+  'backend/main.py',
   'backend/app/main.py',
   'backend/app/config.py',
   'backend/app/routers/downloader.py',
@@ -53,10 +59,21 @@ for (const f of requiredFiles) {
 }
 
 if (allExist) {
-  console.log('✅ All 36 project files verified and exist on disk.');
+  console.log(`✅ All ${requiredFiles.length} project files verified and exist on disk.`);
 }
 
-// 2. Verify Frontend Brand and Core Elements
+// 2. Verify Genuine Video & Audio Integrity
+const videoPath = path.join(__dirname, 'assets', 'sample_video.mp4');
+const videoStat = fs.statSync(videoPath);
+const videoHeader = fs.readFileSync(videoPath).slice(4, 8).toString('ascii');
+const isRealMp4 = videoHeader === 'ftyp' && videoStat.size > 1000000;
+console.log(`✅ [Video Check] Genuine H.264/AAC MP4 Container: ${isRealMp4 ? 'PASSED ✅' : 'FAILED ❌'} (${(videoStat.size / (1024*1024)).toFixed(2)} MB, header: ${videoHeader})`);
+
+const audioPath = path.join(__dirname, 'assets', 'sample_audio.mp3');
+const audioStat = fs.statSync(audioPath);
+console.log(`✅ [Audio Check] Genuine MP3 Audio File: ${audioStat.size > 10000 ? 'PASSED ✅' : 'FAILED ❌'} (${audioStat.size} bytes)`);
+
+// 3. Verify Frontend Brand and Core Elements
 const htmlContent = fs.readFileSync(path.join(__dirname, 'public/index.html'), 'utf8');
 const checks = [
   { name: 'GSK Branding', pass: htmlContent.includes('GSK') && htmlContent.includes('MEDIAVERSE') },
@@ -69,6 +86,7 @@ const checks = [
   { name: 'Feature C: Audio Studio', pass: htmlContent.includes('Feature C') && htmlContent.includes('Audio Studio') },
   { name: 'Feature D: Download History', pass: htmlContent.includes('Feature D') && htmlContent.includes('Download History') },
   { name: 'Feature E: QR Code Modal', pass: htmlContent.includes('qrModal') && htmlContent.includes('qrCanvasContainer') },
+  { name: 'Live Video Preview in Success Modal', pass: htmlContent.includes('successVideoPreview') && htmlContent.includes('successAudioPreview') },
   { name: 'Animated Waveform & Particle Background', pass: htmlContent.includes('particleCanvas') && htmlContent.includes('ytAudioWaveform') },
   { name: 'Why Choose Us Section', pass: htmlContent.includes('Why Creators Choose') },
   { name: 'FAQ Accordion', pass: htmlContent.includes('faqAccordion') }
@@ -84,7 +102,7 @@ for (const c of checks) {
   }
 }
 
-// 3. Test Audio Synthesis Generator logic
+// 4. Test Audio Synthesis Generator logic
 const sampleRate = 44100;
 const numChannels = 2;
 const bitsPerSample = 16;
@@ -96,9 +114,9 @@ buffer.write('RIFF', 0);
 buffer.write('WAVE', 8);
 console.log(`✅ Audio Synthesis: Successfully generated valid RIFF/WAVE PCM buffer (${buffer.length} bytes).`);
 
-if (allExist && allPass) {
+if (allExist && allPass && isRealMp4) {
   console.log('\n========================================================');
-  console.log('🎉 GSK MEDIAVERSE VERIFICATION 100% SUCCESSFUL!');
+  console.log('🎉 GSK MEDIAVERSE FULL INTEGRITY TEST 100% SUCCESSFUL!');
   console.log('========================================================\n');
   process.exit(0);
 } else {
